@@ -31,10 +31,10 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
         Welcome, <?php echo $_SESSION['admin_username']; ?> | <a href="pages/logout.php">Logout</a>
     </div>
     
-    <div class="header">
+    <header class="header-header">
         <h1>NICS AGRI SUPPLY</h1>
         <h2>Sales and Inventory Management System</h2>
-    </div>
+    </header>
     
     <nav class="navbar">
         <ul>
