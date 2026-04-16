@@ -1,29 +1,24 @@
 <?php
-// Database configuration
+session_start();
+
 $host = 'localhost';
 $username = 'root';
 $password = '';
 $database = 'nics_db';
 
-// Create connection
 $conn = mysqli_connect($host, $username, $password, $database);
 
-// Check connection
 if (!$conn) {
     die("Connection failed: " . mysqli_connect_error());
 }
 
-// Set charset to UTF-8
 mysqli_set_charset($conn, "utf8mb4");
 
-// Start session if not started
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+    header("Location: login.php");
+    exit();
 }
-?>
-<?php
 
-// Get filter parameters
 $report_type = $_GET['report_type'] ?? 'daily';
 $date_from = $_GET['date_from'] ?? date('Y-m-d');
 $date_to = $_GET['date_to'] ?? date('Y-m-d');
@@ -37,24 +32,24 @@ if ($report_type == 'daily') {
 }
 
 $sales = mysqli_query($conn, $query);
-
-// Get totals
 $total_query = str_replace("*", "SUM(total_amount) as total", $query);
 $total_result = mysqli_query($conn, $total_query);
 $total_sales = mysqli_fetch_assoc($total_result)['total'] ?? 0;
 
-// Get inventory report
 $inventory = mysqli_query($conn, "SELECT * FROM products ORDER BY quantity ASC");
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../resources/css/global.css">
     <title>Reports - NICS Agri Supply</title>
 </head>
 <body>
+    <div style="text-align: right;">
+        Welcome, <?php echo $_SESSION['admin_username']; ?> | <a href="logout.php">Logout</a>
+    </div>
+    
     <h1>NICS AGRI SUPPLY</h1>
     <h2>Sales and Inventory Reports</h2>
     
@@ -70,32 +65,19 @@ $inventory = mysqli_query($conn, "SELECT * FROM products ORDER BY quantity ASC")
     
     <h3>Generate Report</h3>
     <form method="GET" action="">
-        <table>
-            <tr>
-                <td>Report Type:</td>
-                <td>
-                    <select name="report_type" onchange="this.form.submit()">
-                        <option value="daily" <?php echo $report_type == 'daily' ? 'selected' : ''; ?>>Daily Report</option>
-                        <option value="monthly" <?php echo $report_type == 'monthly' ? 'selected' : ''; ?>>Date Range Report</option>
-                    </select>
-                </td>
-            </tr>
-            <?php if($report_type == 'daily'): ?>
-            <tr>
-                <td>Date:</td>
-                <td><input type="date" name="date_from" value="<?php echo $date_from; ?>" onchange="this.form.submit()"></td>
-            </tr>
-            <?php else: ?>
-            <tr>
-                <td>From Date:</td>
-                <td><input type="date" name="date_from" value="<?php echo $date_from; ?>" onchange="this.form.submit()"></td>
-            </tr>
-            <tr>
-                <td>To Date:</td>
-                <td><input type="date" name="date_to" value="<?php echo $date_to; ?>" onchange="this.form.submit()"></td>
-            </tr>
-            <?php endif; ?>
-        </table>
+        <tr>
+            <td>Report Type: </td>
+            <td><select name="report_type" onchange="this.form.submit()">
+                <option value="daily" <?php echo $report_type == 'daily' ? 'selected' : ''; ?>>Daily Report</option>
+                <option value="monthly" <?php echo $report_type == 'monthly' ? 'selected' : ''; ?>>Date Range Report</option>
+            </select></td>
+        </tr>
+        <?php if($report_type == 'daily'): ?>
+        <tr><td>Date:</td><td><input type="date" name="date_from" value="<?php echo $date_from; ?>" onchange="this.form.submit()"></td></tr>
+        <?php else: ?>
+        <tr><td>From Date:</td><td><input type="date" name="date_from" value="<?php echo $date_from; ?>" onchange="this.form.submit()"></td></tr>
+        <tr><td>To Date:</td><td><input type="date" name="date_to" value="<?php echo $date_to; ?>" onchange="this.form.submit()"></td></tr>
+        <?php endif; ?>
     </form>
     
     <hr>
@@ -105,13 +87,7 @@ $inventory = mysqli_query($conn, "SELECT * FROM products ORDER BY quantity ASC")
     <p>Number of Transactions: <?php echo mysqli_num_rows($sales); ?></p>
     
     <table border="1" cellpadding="10">
-        <tr>
-            <th>Invoice #</th>
-            <th>Date</th>
-            <th>Total Amount</th>
-            <th>Payment</th>
-            <th>Change</th>
-        </tr>
+        <tr><th>Invoice #</th><th>Date</th><th>Total Amount</th><th>Payment</th><th>Change</th></tr>
         <?php 
         mysqli_data_seek($sales, 0);
         if(mysqli_num_rows($sales) > 0): 
@@ -124,13 +100,8 @@ $inventory = mysqli_query($conn, "SELECT * FROM products ORDER BY quantity ASC")
             <td>₱<?php echo number_format($row['payment_amount'], 2); ?></td>
             <td>₱<?php echo number_format($row['change_amount'], 2); ?></td>
         </tr>
-        <?php 
-            endwhile;
-        else:
-        ?>
-        <tr>
-            <td colspan="5" style="text-align: center;">No sales found for this period.</td>
-        </tr>
+        <?php endwhile; else: ?>
+        <tr><td colspan="5"">No sales found for this period.</td></tr>
         <?php endif; ?>
     </table>
     
@@ -138,12 +109,7 @@ $inventory = mysqli_query($conn, "SELECT * FROM products ORDER BY quantity ASC")
     
     <h3>Current Inventory Status</h3>
     <table border="1" cellpadding="10">
-        <tr>
-            <th>Product Name</th>
-            <th>Current Stock</th>
-            <th>Low Stock Alert</th>
-            <th>Status</th>
-        </tr>
+        <tr><th>Product Name</th><th>Current Stock</th><th>Low Stock Alert</th><th>Status</th></tr>
         <?php 
         mysqli_data_seek($inventory, 0);
         while($row = mysqli_fetch_assoc($inventory)):
@@ -152,9 +118,7 @@ $inventory = mysqli_query($conn, "SELECT * FROM products ORDER BY quantity ASC")
             <td><?php echo $row['product_name']; ?></td>
             <td><?php echo $row['quantity']; ?></td>
             <td><?php echo $row['low_stock_notif']; ?></td>
-            <td style="color: <?php echo $row['quantity'] <= $row['low_stock_notif'] ? 'red' : 'green'; ?>;">
-                <?php echo $row['quantity'] <= $row['low_stock_notif'] ? '⚠️ Low Stock' : '✓ In Stock'; ?>
-            </td>
+            <td style="color: <?php echo $row['quantity'] <= $row['low_stock_notif'] ? 'red' : 'green'; ?>;"><?php echo $row['quantity'] <= $row['low_stock_notif'] ? '⚠️ Low Stock' : '✓ In Stock'; ?></td>
         </tr>
         <?php endwhile; ?>
     </table>

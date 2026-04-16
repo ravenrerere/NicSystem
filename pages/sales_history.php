@@ -1,40 +1,38 @@
 <?php
-// Database configuration
+session_start();
+
 $host = 'localhost';
 $username = 'root';
 $password = '';
 $database = 'nics_db';
 
-// Create connection
 $conn = mysqli_connect($host, $username, $password, $database);
 
-// Check connection
 if (!$conn) {
     die("Connection failed: " . mysqli_connect_error());
 }
 
-// Set charset to UTF-8
 mysqli_set_charset($conn, "utf8mb4");
 
-// Start session if not started
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
+    header("Location: login.php");
+    exit();
 }
-?>
-<?php
 
-// Get all sales
 $sales = mysqli_query($conn, "SELECT * FROM sales ORDER BY sale_date DESC");
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../resources/css/global.css">
     <title>Sales History - NICS Agri Supply</title>
 </head>
 <body>
+    <div>
+        Welcome, <?php echo $_SESSION['admin_username']; ?> | <a href="logout.php">Logout</a>
+    </div>
+    
     <h1>NICS AGRI SUPPLY</h1>
     <h2>Sales History</h2>
     
@@ -49,15 +47,8 @@ $sales = mysqli_query($conn, "SELECT * FROM sales ORDER BY sale_date DESC");
     <hr>
     
     <h3>All Transactions</h3>
-    <table border="1" cellpadding="10">
-        <tr>
-            <th>Invoice #</th>
-            <th>Date</th>
-            <th>Total Amount</th>
-            <th>Payment</th>
-            <th>Change</th>
-            <th>Actions</th>
-        </tr>
+    <table>
+        <tr><th>Invoice #</th><th>Date</th><th>Total Amount</th><th>Payment</th><th>Change</th><th>Actions</th></tr>
         <?php while($row = mysqli_fetch_assoc($sales)): ?>
         <tr>
             <td><?php echo $row['invoice_number']; ?></td>

@@ -31,4 +31,13 @@ CREATE TABLE sales_items (
     FOREIGN KEY (product_id) REFERENCES products(product_id)
 );
 
+CREATE TABLE IF NOT EXISTS admin_users (
+    admin_id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO admin_users (username, password) 
+VALUES ('admin', MD5('admin123'));
 
