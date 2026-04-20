@@ -35,7 +35,6 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
         <h1>NICS AGRI SUPPLY</h1>
         <h2>Sales and Inventory Management System</h2>
     </header>
-    
     <nav class="navbar">
         <ul>
             <li><a href="index.php">Dashboard</a></li>
@@ -45,9 +44,7 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
             <li><a href="pages/reports.php">Reports</a></li>
         </ul>
     </nav>
-    
     <hr>
-    
     <div class="dashboard-content">
         <h3>Dashboard</h3>
 
