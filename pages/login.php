@@ -43,38 +43,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="../resources/css/global.css">
+    <link rel="stylesheet" href="../resources/css/login.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <title>Admin Login - NICS Agri Supply</title>
 </head>
 <body>
-    <div>
-        <h2>NICS AGRI SUPPLY</h2>
-        <h3>Admin Login</h3>
+    <p class="background-container"></p>
+    <div class="login-form">
+        <div class="header-header">
+            <h2>NICS AGRI SUPPLY</h2>
+            <h3>Admin Login</h3>
+        </div>
         
         <?php if($error): ?>
             <p><?php echo $error; ?></p>
         <?php endif; ?>
-        
-        <form method="POST" action="">
-            <table>
-                <tr>
-                    <td>Username: </td>
-                    <td><input type="text" name="username" required> </td>
-                </tr>
-                <tr>
-                    <td>Password: </td>
-                    <td><input type="password" name="password" required> </td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <input type="submit" value="Login">
-                    </td>
-                </tr>
-            </table>
-        </form>
-        
-        <p>
-            Default: admin / admin123
-        </p>
+        <section class="container">
+            <div class="login-container">
+                <h3 class="heading">Login</h3>
+                <form method="POST" action="" class="form-self">
+                    <div class="input field">
+                        <input type="text" name="username" id="username" placeholder="Username" class="username" required>
+                    </div>
+                    <div class="input field">
+                        <input type="password" name="password" id="password" placeholder="Password" class="password" required>
+                        <i class='bx bx-hide hide-show'></i>
+                    </div>
+                    <div class="input field">
+                        <button type="submit" name="Login">Login</button>
+                    </div>
+                    <p>
+                        Default: admin / admin123
+                    </p>
+                </form>
+            </div>
+        </section>
     </div>
+    <script src="../resources/js/script.js"></script>
 </body>
 </html>
